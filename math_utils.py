@@ -1,10 +1,20 @@
+from argparse import ArgumentTypeError
 import numpy as np
 import math
 import itertools
 from numbers import Number
 from fractions import Fraction
+import cmath
+from Types import Number
 
 
+
+
+
+
+number_decimals = 8
+tau = math.tau
+circ_angle = lambda div,n: math.sin((math.pi/div) * n)
 cubling = lambda v: v * pow(v, 2)
 pyth_area_tri = lambda n: int(((3 * n) * (4 * n)) / 2)
 pyth_area_rect = lambda n: (3 * n) * (4 * n)
@@ -14,13 +24,227 @@ pyth_tripple = lambda n: [3 * n, 4 * n, int(math.hypot(3 * n, 4 * n))]
 pyth_trip_pow = lambda n: [pow(v, 2) for v in pyth_tripple(1)]
 pyth_side_a = lambda n: 3 * n
 pyth_side_b = lambda n: 4 * n
+wrap = lambda x,bound: round(bound * ((x/bound) - int(x/bound)),number_decimals) if x > bound else x
+cyc_wrap = lambda x,bound: wrap(x,bound) if int(x/bound) % 2 == 0 else round(bound - (wrap(x,bound)),number_decimals)
+cyc_direction = lambda x,bound: 1 if int(cyc_wrap(x,bound)) % 2 == 0 else -1
 prop = lambda w, a, b: w / (a / b)
 frac_series = lambda w, q, n: [int(w * (1 / q)) * i for i in range(1, n + 1)]
 prop_golden_ratio = lambda w: prop(w,1+(5**1/2),2)
 quotient = lambda a,b: (a - (a % b)) // b
 cot = lambda x: 1 / math.tan(x)
+nth_root = lambda x,n: x ** 1/n
 phi = (1 + (5 ** 1/2)) / 2
-pi2 = 2 * math.pi
+ang_degrees = np.linspace(0,tau,360)
+theta = lambda n: math.sin((tau/360) * n % 90)
+circum = lambda r: tau*r
+roots_of_unity = lambda n: math.log(math.e ** tau) / n
+sphere_vol = lambda r: tau * pow(r,3)
+normalize = lambda x,maximum: x / (maximum * x)
+arclength = lambda frac,radius: circum(radius) / frac
+tau_dec = tau - int(tau)
+e_dec = math.e - int(math.e)
+ang_val = lambda n: ang_degrees[n%360]
+quantize = lambda x,n: (0.1 * n) * tau
+arc_len = lambda div,n: circ_angle(int(div),int(n))
+#is_bounded_index = lambda ind,arr: isinstance(ind,int) and ind >= 0 and ind <= (len(arr) -1)
+right_angle = math.radians(90)
+is_number_list = lambda arr: isinstance(arr,list) and all(isinstance(x,(int,float)) for x in arr)
+t_of_k = lambda k: math.log(pow(math.e,k)) / k
+sinc = lambda x: math.sin(x) / x
+
+
+def spatial_unit(q,aspect_ratio):
+  u = q / sum(aspect_ratio)
+  l = len(aspect_ratio)
+  return [u*aspect_ratio[axis] for axis in range(0,l)]
+
+
+
+
+
+#calculate volume and surface area of a sphere in any dimension given side length for a square area
+def ball(side_length, dim):
+     l = side_length
+     r = l / 2
+     fourth_of_tau = math.tau / 4
+     if dim > 1:
+       vol = (dim * fourth_of_tau) * pow(r,dim)
+       area = (2 * (dim * fourth_of_tau)) * pow(r,dim - 1)
+       return {"vol": vol, "area": area}
+     elif dim == 1:
+       vol = 2*r
+       area = 2
+       return {"vol":vol,"area":area}
+     else: raise ValueError("dim must be positive integer <= 1")
+
+def ball2(l:Number,dim:int):
+    r = l / 2
+    nomval = pow(math.pi,int(dim/2))
+    gamval = math.gamma(int(dim/2) + 1)
+    # Volume formula for an n-ball
+    vol = (nomval / gamval) * pow(r, dim)
+    # Surface area formula for an (n-1)-sphere
+    area = ((2 * nomval) / gamval) * pow(r,dim-1)
+    return {"vol":vol,"area":area}
+
+def cart_to_sphere(p):
+  u,v = p[0],p[1]
+  dnom = 1 + pow(u,2) + pow(v,2)
+  x,y,z = (2*u) / dnom, (2*v) / dnom, (-1 + pow(u,2) + pow(v,2)) / dnom
+  return [x,y,z]
+
+class ProjectiveSpace:
+
+    def __init__(self,L:Number):
+      self.sidelength = L
+      self.sqr_area = L ** 2
+      self.circ_diam = L
+      self.circ_radius = L / 2
+      self.circum = math.tau / self.circ_radius
+      self.circ_area = math.tau * self.circ_radius
+
+    def volume_ball(self,dimension:int):
+        return self.circum * pow(math.pi,int(dimension/2)) * pow(self.circ_radius,dimension)
+
+
+
+def pyth_third(n):
+  whole = ((3*n) * (4*n)) / 3
+  third_of_whole = whole / 3
+
+  return [whole,third_of_whole]
+
+#print("pyth_third",pyth_third(1))
+
+
+
+
+def linlin(v,inmin,inmax,outmin,outmax): return (v - inmin)/(inmax - inmin) * (outmax - outmin) + outmin
+
+def in_S2(tup):
+    x1,x2,x3 = tup[0],tup[1],tup[2]
+    return True if pow(x1,2) + pow(x2,2) + pow(x3,2) == 1 else False
+
+
+def unary_operator(fn,dim):
+    if isinstance(dim,int) and dim > 0:
+        if dim == 1: return fn
+        else:
+          return lambda a: [fn(a[i]) for i in range(dim)]
+    else:
+        raise ArgumentTypeError("dim must be int > 0")
+
+def binary_operator(fn,dim):
+    if isinstance(dim,int) and dim > 0:
+        if dim == 1: return fn
+        else:
+          return lambda a,b: [fn(a[i],b[i]) for i in range(dim)]
+    else:
+        raise ArgumentTypeError("dim must be int > 0")
+
+def mobius_trans(z,coef):
+  a,b,c,d = coef[0],coef[1],coef[2],coef[3]
+  return ((a*z) + b) /((c*z) + d)
+
+def mobius_transl(z,b):
+  return mobius_trans(z,[1,b,0,1])
+
+def mobius_scale(z,s):
+    return mobius_trans(z,[s,0,0,1])
+
+def mobius_inv(z):
+    return mobius_trans(z,[0,1,1,0])
+
+def mobius_rot(z,ang):
+    return mobius_trans(z, [cmath.exp(1j * ang), 0, 0, 1])
+
+def wedge(v1,v2):
+  e = dict()
+  for i in range(len(v1)):
+      for j in range(i + 1, len(v1)):
+        k = "e"+str(i)+str(j)
+        if i != 0:
+          e[k] = (v1[i] * v2[j] - v1[j] * v2[i])
+  return e, sum(e.values())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+
+class composite_number:
+
+    def __init__(self,real,imag_parts):
+      if is_number_list(imag_parts) and isinstance(real,(int,float)):
+        self.real = real
+        self.imag_parts = imag_parts
+        self.highest_dim = len(imag_parts) - 1
+        self.imag_sum = sum(self.imag_parts)
+        self.angles = [math.radians(normalize(p,360)) for p in self.imag_parts]
+        self.wrap = lambda x, bound: round(bound * ((x / bound) - int(x / bound)),8) if x > bound else round(x,8)
+        self.cyc_wrap = lambda x, bound: wrap(x, bound) if int(x / bound) % 2 == 0 else round(bound - (wrap(x, bound)),8)
+        #self.direction = 1 if int(num / math.pi) % 2 == 0 else -1
+        #self.angle = (tau/4) + cyc_wrap(num,right_angle)
+        #self.value = math.sin(self.angle)
+
+    def get_direction(self,part_index):
+       if is_bounded_index(self.imag_parts,part_index):
+           return int(self.imag_parts[part_index]/right_angle) % 2 == 0
+
+    def get_angle(self,part_index,sector=None):
+        if is_bounded_index(self.imag_parts,part_index):
+            imag_part = self.imag_parts[part_index]
+            normal_angle = self.cyc_wrap(imag_part,right_angle)
+            if sector and isinstance(sector, int) and 0 <= sector <= 3:
+                return normal_angle + (right_angle * sector)
+            else:
+                return normal_angle + (right_angle * sector)
+        else: raise ValueError("index out of range")
+
+    def get_normal(self,part_index):
+        return round(math.sin(self.get_angle(part_index)[0]),8)
+
+    def get_number_of_turns(self,part_index):
+        if is_bounded_index(self.imag_parts,part_index):
+            return int(self.imag_parts[part_index]/math.tau)
+        else: raise ValueError("index out of range")
+
+    def nsphere_coordinate(self,rad_ratio,dim):
+        cos_c = lambda i: math.cos(self.angles[i])
+        sin_c = lambda i: math.sin(self.angles[i])
+        cos_d,sin_d,cos_l,sin_l = cos_c(-1),sin_c(-1),cos_c(-2),sin_c(-2)
+        br = self.real ** dim
+        rad = normalize(rad_ratio,br) * br
+        comp_first = cos_d
+        comp_mid = lambda j: math.prod([sin_d] + [sin_c(i) if i < (j-1) else cos_c(i) for i in range(0,j)])
+        comp_last = lambda j: math.prod([sin_d] + [sin_c(i) for i in range(0,j)])
+        if dim == 1:
+            return [rad,comp_first]
+        elif dim == 2:
+            return [rad,comp_first,comp_mid(2)]
+        else:
+            mids = [comp_mid(k) for k in range(dim)]
+            return [rad,comp_first] + mids + comp_last(dim)
+
+"""
+
+
+
+
+
+def amt(x):  return tau / math.log(x)
 
 # divide like diophantus
 def divide_with_difference(whole, difference):
@@ -124,7 +348,6 @@ def continued_fraction(x, limit=10):
     while limit > 0:
         frc = x - int(x)
         rec = 1 / frc
-        print(rec)
         t = int(rec)
         if frc == 0:
             break
@@ -140,7 +363,7 @@ def continued_fraction_reconst(rep):
         result = rep[i] + 1 / result
     return result
 
-def fraction_between(x: Fraction, y: Fraction) -> Fraction:
+def fraction_between(x, y):
     """
     Simplest fraction strictly between fractions x and y.
     """
@@ -152,7 +375,7 @@ def fraction_between(x: Fraction, y: Fraction) -> Fraction:
     if y <= 0:
         return -fraction_between(-y, -x)
     elif x < 0:
-        return Fraction(0, 1)
+        return 1
 
     s, t, u, v = x.numerator, x.denominator, y.numerator, y.denominator
     a, b, c, d = 1, 0, 0, 1
@@ -161,7 +384,7 @@ def fraction_between(x: Fraction, y: Fraction) -> Fraction:
         s, t, u, v = v, u - q * v, t, s - q * t
         a, b, c, d = b + q * a, a, d + q * c, c
         if t > s:
-            return Fraction(a + b, c + d)
+            return (a + b) / (c + d)
 
 def lies_on_line(p,l):
     """
@@ -270,10 +493,9 @@ def sieve(n):
 
     return primes
 
-def binomial(m, k):
-    nom = math.factorial(m + k)
-    dnom = math.factorial(m) * math.factorial(k)
-    return nom / dnom
+def binomial(n,k):
+    return math.factorial(n) / (math.factorial(k) * math.factorial(n-k))
+
 
 def catalan(n):
     """get the n-th catalan number"""
@@ -335,7 +557,7 @@ def generate_frieze_pattern(n, I):
     r_4 = [int(((r_3[i - 1] * r_3[i]) - 1) / r_2[i]) for i in range(1, n + 3)]
     r_5 = [int(((r_4[i - 1] * r_4[i]) - 1) / r_3[i]) for i in range(1, n + 2)]
     r_6 = [int(((r_5[i - 1] * r_5[i]) - 1) / r_4[i]) for i in range(1, n + 1)]
-    print(r_1)
+    #print(r_1)
     return [r_1, r_2, r_3, r_4, r_5, r_6]
 
 def point_on_the_unit_circle(y):
@@ -414,7 +636,7 @@ def point_on_proj_unit_circle(t):
   if t_sqr != -1:
     x = t / (1 + t_sqr)
     y = 1 / (1 + t_sqr)
-    print(x, y)
+    #print(x, y)
     return [x, y]
   else:
     raise ArithmeticError("t can not be -1")
@@ -434,7 +656,7 @@ def vector_mul(v1, v2):
   return [a * c, b * d]
 
 def vector_scale(num, v):
-  print(v)
+  #print(v)
   a, b = v[0], v[1]
   return [a * num, b * num]
 
@@ -618,7 +840,7 @@ def circumcenter_triangle(p1, p2, p3):
   it1 = intersection_point(bs1, bs2)
   it2 = intersection_point(bs2, bs3)
   it3 = intersection_point(bs3, bs1)
-  print(it1, it2, it3)
+  #print(it1, it2, it3)
   return it1 if all([it1, it2, it3]) else None
 
 def orthocenter_triangle(p1, p2, p3):
@@ -684,7 +906,7 @@ def wedge(v1,v2):
   e = dict()
   for i in range(len(v1)):
       for j in range(i + 1, len(v1)):
-        k = "e"+str(i)+str(j);
+        k = "e"+str(i)+str(j)
         if i != 0:
           e[k] = (v1[i] * v2[j] - v1[j] * v2[i])
   return e, sum(e.values())
