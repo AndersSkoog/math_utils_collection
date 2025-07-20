@@ -8,12 +8,8 @@ A maximum value (number of additions of the minimal unit).
 This reframes a/b as: a recursive steps into the field of reciprocals of integer b.
 
 the proportianal number system recognize that we should not treat rational numbers to be anything else than an expression
-of a reciprocials of an integer b where a/b = 1/a * b
+of a reciprocials of an integer b where a/b = 1/b * a
 we get the minimal unit u from dividing the reciprocal 1/b with it self a number of times,
-for example if we have the rational number 7/4, then: u = ((((1/7)/7)/7)/7)/7) = (4*7) ** -4
-continuing the example where a=4 then: 1/b = (u*4)+(u*4)+(u*4)+(u*4) = 16u
-similarly the number 4 could in this example also encode the largest number in the field.
-i.e 4*(4/b) = ((16u)*4)*4 = 256u
 """
 
 class ProportionalNumber:
