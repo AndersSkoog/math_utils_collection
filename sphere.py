@@ -1,4 +1,4 @@
-from math_utils import is_num_between, is_num, normalize_vector, tau
+from math_utils import is_num_between, is_num, normalize_vector, tau, ang_theta, ang_phi
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
@@ -6,17 +6,6 @@ import math
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-
-
-def ang_theta(num):
-  if is_num_between(num,-np.pi,np.pi): return num
-  elif is_num_between(num,-180,180): return np.radians(num)
-  else: raise ValueError("must be an angle between 0-tau")
-
-def ang_phi(num):
-  if is_num_between(num,-(np.pi/2),np.pi/2): return num
-  elif is_num_between(num,-90,90): return np.radians(num)
-  else: raise ValueError("must be an angle between 0-pi")
 
 def sphere_coord(arr,center):
   r,theta,phi = is_num(arr[0]), ang_theta(arr[1]), ang_phi(arr[2])
@@ -97,8 +86,6 @@ def great_circle_2(p,r,center,num_points=360):
     circle_points = r * (np.outer(np.cos(t), u) + np.outer(np.sin(t), v))
     return center + circle_points
 
-
-
 def line_to_sphere_point(center, point_on_sphere, num_points=100):
     t_vals = np.linspace(0, 1, num_points)
     line_points = [(1 - t) * center + t * point_on_sphere for t in t_vals]
@@ -127,6 +114,12 @@ class SpherePoint:
         self.great_circ2 = great_circle_2(self.coord,self.r,self.center,self.res)
         self.elipses = sphere_ellipses(self.coord,self.center)
         self.line_seg = line_to_sphere_point(self.center,self.coord)
+
+    def plane_coord(self):
+        X, Y, Z = self.coord[0], self.coord[1], self.coord[2]
+        # Avoid division by zero (Z near 0 means "at viewer's eye")
+        if Z == 0: Z = 1e-8
+        return [X / (self.r - Z), Y / (self.r - Z)]
 
 
     def plot_line(self):
@@ -173,12 +166,9 @@ class SpherePoint:
 
 def plane_to_sphere_point(x,y,side_length):
   r = side_length / 2 # can be the radius value for a spherical coordinate
-  ang = np.arctan2(y,x) # can be the theta value for a spherical coordinate
-  z = np.sqrt(pow(x, 2) + pow(y, 2))
-  zr =  pow(z,2) - pow(z-r,2) # can be the polar angle for the spherical coordinate
-  print(zr)
-  print(z)
-  return SpherePoint(r,ang,z,center=[0,0,r])
+  theta = np.arctan2(y,x) # can be the theta value for a spherical coordinate
+  phi = np.sqrt(pow(x, 2) + pow(y, 2)) # can be the polar angle for the spherical coordinate
+  return SpherePoint(r,theta,phi,center=[0,0,r])
 
 R = 1
 C = [0,0,0]

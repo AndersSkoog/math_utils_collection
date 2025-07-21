@@ -307,29 +307,42 @@ def z_not_zero(cmplx): return isinstance(cmplx,complex) and cmplx != complex(0,0
 def z_conj(cmplx):
   if isinstance(cmplx,complex): return cmplx - complex(cmplx.real, -cmplx.imag)
   else: raise ArithmeticError("expected Complex argument")
-def mobius_trans(z:complex,coef) -> complex:
-  a,b,c,d = coef[0],coef[1],coef[2],coef[3]
-  return ((a*z) + b) /((c*z) + d)
-def mobius_transl(z:complex,b:complex) -> complex:
-  return mobius_trans(z,[1,b,0,1])
-def mobius_scale(z,s):
-    return mobius_trans(z,[s,0,0,1])
+
+def mobius_trans(z: complex, a: complex, b: complex, c: complex, d: complex) -> complex:
+    return ((a * z) + b) / ((c * z) + d)
+
+def mobius_transl(z: complex, b: complex) -> complex:
+    return mobius_trans(z, a=1+0j, b=b, c=0+0j, d=1+0j)
+
+def mobius_scale(z: complex, a: complex):
+    return mobius_trans(z, a=a, b=0+0j, c=0+0j, d=1+0j)
+
 def mobius_inv(z):
-    return mobius_trans(z,[0,1,1,0])
-def mobius_rot(z,ang):
-    return mobius_trans(z, [cmath.exp(1j * ang), 0, 0, 1])
+    if z == 0:
+        return complex('inf')
+    return mobius_trans(z, a=0+0j, b=1+0j, c=1+0j, d=0+0j)
+
+def mobius_rot(z, ang):
+    a = cmath.exp(1j * ang)
+    return mobius_trans(z, a=a, b=0+0j, c=0+0j, d=1+0j)
+
+
 def rad_distance(tup):
     u,v = tup[0],tup[1]
     return (pow(u,2) + pow(v,2)) ** (1/2)
+
 def polar(ang):
     return math.sin(ang) / (1 - math.cos(ang))
+
 def sphere_to_polar(tup):
     r,th,z = tup[0],tup[1],tup[2]
     return tuple((r/1-z,th))
+
 def polar_to_sphere(tup):
     _p1,_p2 = tup[0],tup[1]
     r,th,z = (2*_p1)/1+pow(_p1,2),p2,(pow(_p1,2) - 1) / (pow(_p1,2) + 1)
     return [r,th,z]
+
 def cart_plane_to_sphere(tup):
     u, v = tup[0],tup[1]
     su,sv = pow(u,2),pow(u,v)
@@ -337,12 +350,16 @@ def cart_plane_to_sphere(tup):
     #x,y,z = u2/(1+r2),v2/(1+r2),(1 - r2) / (1 + r2)
     x,y,z = u2 / (1+su+sv), v2 / (1+su+sv), (1-su-sv) / (1+su+sv)
     return tuple((x, y, z))
+
 def cart_sphere_to_plane(tup):
     x,y,z = tup[0],tup[1],tup[2]
     u,v = x / (1-z), y / (1-z)
     return tuple((u, v))
+
 def n_ang_cos(ang): return math.cos(math.pi * normalize2(ang,math.pi))
+
 def n_ang_sin(ang): return math.sin(math.tau * normalize2(ang,math.tau))
+
 def n_coord(arr,i):
     if i == 1:
         return arr[0] * math.cos(arr[1])
@@ -359,6 +376,7 @@ def n_coord(arr,i):
           l = [arr[0]] + sin_vals + cos_val
           print(l)
           return math.prod(l)
+
 def n_coord_normalized(arr,i):
   if i <= len(arr):
     is_sec_last = i == (len(arr) - 1)
@@ -374,6 +392,7 @@ def n_coord_normalized(arr,i):
       return [math.prod(parr),len(parr)]
   else:
       raise ValueError("i must be in range of arr")
+
 def n_coords(arr):
   if len(arr) >= 3:
     dim = len(arr)
@@ -382,6 +401,7 @@ def n_coords(arr):
     for i in range(1,dim+1):
         ret[f"x{i}"] = n_coord(arr,i)
     return ret
+
 #map a point in the xy cart plane to point with its antipodal on s2 with radius
 def xy_to_sphere(p,sr):
     x,y,x2,y2,r = p[0],p[1],p[0]**2,p[1]**2,sr
