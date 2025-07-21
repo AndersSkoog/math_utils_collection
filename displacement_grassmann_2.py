@@ -1,5 +1,3 @@
-import math_utils
-
 """
 ----------------------------------
 grassmanns anticommutative law states that: ab = -ba
@@ -7,7 +5,6 @@ this means that if we have a reference order of two multiplicative terms a,b
 then the product of the permuted order b,a is equal to the product of the reference order multiplied by its negative sign 
 this rule also allow us to treat multiplication as a unary operator working on tupples instead as a binary operator in normal arthmetic.
 """
-import numpy as np
 
 def is_number(x):
   return isinstance(x,(int,float))
@@ -39,7 +36,7 @@ def grassmann_mul(tup):
 
       # Case 3: If both are numbers, apply Grassmann's rule
       elif is_number(a) and is_number(b):
-        return (a*b,-b*a)
+        return a*b,-b*a
 
       else:
         raise ArithmeticError("Elements must be tuples or numbers")
@@ -50,9 +47,9 @@ def grassmann_add(a,b):
   if all([is_number(a),is_number(b)]):
     return a + b
   elif all([is_two_tupple_product(a),is_two_tupple_product(b)]):
-    return grassmann_mul(a,b)
+    return grassmann_mul((a,b))
   else:
-    return (a,b)
+    return a,b
 
 """
 I associate the concept of the elementary magnitude with the solution of a
