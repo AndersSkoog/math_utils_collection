@@ -1,11 +1,7 @@
 from math_utils import is_num_between, is_num, normalize_vector, tau, ang_theta, ang_phi
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider
 import math
 
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
 
 def sphere_coord(arr,center):
   r,theta,phi = is_num(arr[0]), ang_theta(arr[1]), ang_phi(arr[2])
@@ -92,7 +88,6 @@ def line_to_sphere_point(center, point_on_sphere, num_points=100):
     px, py, pz = map(np.array, zip(*line_points))
     return [px,py,pz]
 
-
 class SpherePoint:
     def __init__(self,r,theta,phi,center,res=360):
         self.center = np.array(center)
@@ -122,123 +117,17 @@ class SpherePoint:
         return [X / (self.r - Z), Y / (self.r - Z)]
 
 
-    def plot_line(self):
-        ax.plot(self.line_seg[0],self.line_seg[1], self.line_seg[2], color="blue", linewidth=2)
-
-    def plot_points(self):
-        px,py,pz = self.coord[0],self.coord[1],self.coord[2]
-        ax.plot(px,py,pz,color="blue",marker="o")
-        ax.plot(-px,-py,-pz,color="red",marker="o")
-        ax.plot(-px,-py,pz,color="blue",marker="o")
-        ax.plot(px,py,-pz,color="red",marker="o")
-        ax.plot(self.center[0],self.center[1],self.center[2],color="black",marker="o")
-
-    def plot_circles(self,lw):
-        px,py,pz = zip(*self.xy_circ)
-        apx,apy,apz = zip(*self.ap_xy_circ)
-        ax.plot(px,py,pz,color="black",linewidth=lw)
-        ax.plot(apx,apy,apz,color="black",linewidth=lw)
-
-    def plot_elipses(self,lw):
-        el1_x,el1_y,el1_z = zip(*self.elipses[0])
-        el2_x,el2_y,el2_z = zip(*self.elipses[1])
-        el3_x,el3_y,el3_z = zip(*self.elipses[2])
-        el4_x, el4_y, el4_z = zip(*self.elipses[3])
-        ax.plot(el1_x,el1_y,el1_z,color="cyan",linewidth=lw)
-        ax.plot(el2_x,el2_y,el2_z,color="cyan",linewidth=lw)
-        ax.plot(el3_x,el3_y,el3_z,color="cyan",linewidth=lw)
-        ax.plot(el4_x,el4_y,el4_z,color="cyan",linewidth=lw)
-
-    def plot_great_circles(self,lw):
-        px1,py1,pz1 = zip(*self.great_circ1)
-        px2, py2, pz2 = zip(*self.great_circ2)
-        ax.plot(px1,py1,pz1,color="orange",linewidth=lw)
-        ax.plot(px2, py2, pz2, color="orange", linewidth=lw)
-
-    def plot_sphere(self):
-        theta_vals = np.linspace(0, tau, 360)
-        phi_vals = np.linspace(0, np.pi, 360)
-        mesh_theta, mesh_phi = np.meshgrid(theta_vals, phi_vals)
-        sphere_x = self.center[0] + self.r * np.sin(mesh_theta) * np.cos(mesh_phi)
-        sphere_y = self.center[1] + self.r * np.sin(mesh_theta) * np.sin(mesh_phi)
-        sphere_z = self.center[2] + self.r * np.cos(mesh_theta)
-        ax.plot_surface(sphere_x, sphere_y, sphere_z, color='#FF5733', alpha=0.2)  # Orange color
-
 def plane_to_sphere_point(x,y,side_length):
   r = side_length / 2 # can be the radius value for a spherical coordinate
   theta = np.arctan2(y,x) # can be the theta value for a spherical coordinate
   phi = np.sqrt(pow(x, 2) + pow(y, 2)) # can be the polar angle for the spherical coordinate
   return SpherePoint(r,theta,phi,center=[0,0,r])
 
-R = 1
-C = [0,0,0]
-theta_val = 0
-phi_val = 20
-sphere = plane_to_sphere_point(1.2,0.6,2)
 
-def set_axes_equal():
-    """Set equal aspect ratio for a 3D plot so the sphere looks correct."""
-    limits = np.array([ax.get_xlim(), ax.get_ylim(), ax.get_zlim()])
-    min_limit, max_limit = limits.min(), limits.max()
-    ax.set_xlim([min_limit, max_limit])
-    ax.set_ylim([min_limit, max_limit])
-    ax.set_zlim([min_limit, max_limit])
+def stereographic_projection(p):
+    x,y,z = p[0],p[1],p[2]
+    denom = 1 - z
+    if denom == 0:
+        return np.inf  # handle north pole
+    return complex(x, y) / denom
 
-
-def update_theta(val):
-    elev, azim = ax.elev, ax.azim  # Store camera angle
-    ax.clear()
-    global sphere,theta_val,phi_val
-    theta_val = val
-    sphere = SpherePoint(R,theta=theta_val,phi=phi_val,center=C)
-    sphere.plot_points()
-    sphere.plot_line()
-    sphere.plot_sphere()
-    sphere.plot_elipses(lw=2)
-    sphere.plot_circles(lw=2)
-    sphere.plot_great_circles(lw=2)
-    set_axes_equal()
-    ax.view_init(elev=elev, azim=azim)
-    plt.draw()
-
-def update_phi(val):
-    elev, azim = ax.elev, ax.azim  # Store camera angle
-    ax.clear()
-    global sphere,theta_val,phi_val
-    phi_val = val
-    sphere = SpherePoint(R,theta=theta_val,phi=phi_val,center=C)
-    sphere.plot_line()
-    sphere.plot_points()
-    sphere.plot_sphere()
-    sphere.plot_elipses(lw=2)
-    sphere.plot_circles(lw=2)
-    sphere.plot_great_circles(lw=2)
-    set_axes_equal()
-    ax.view_init(elev=elev, azim=azim)
-    plt.draw()
-
-
-
-ax_slider_1 = plt.axes([0.2, 0.1, 0.65, 0.03])
-ax_slider_2 = plt.axes([0.2, 0.03, 0.65, 0.03])
-slider1 = Slider(ax_slider_1, 'theta', -180, 180, valinit=0, valstep=1)
-slider2 = Slider(ax_slider_2, 'phi', -90, 90, valinit=0, valstep=1)
-slider1.on_changed(update_theta)
-slider2.on_changed(update_phi)
-
-sphere.plot_line()
-sphere.plot_points()
-sphere.plot_sphere()
-sphere.plot_elipses(lw=2)
-sphere.plot_circles(lw=2)
-sphere.plot_great_circles(lw=2)
-set_axes_equal()
-
-
-lim = R + 1
-ax.set_xlim(-lim,lim)
-ax.set_ylim(-lim,lim)
-ax.set_zlim(-lim,lim)
-ax.set_box_aspect([1, 1, 1])
-plt.ion()  # Enable interactive mode
-plt.show(block=True)

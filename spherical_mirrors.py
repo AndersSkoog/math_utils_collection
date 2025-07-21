@@ -1,8 +1,6 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from sympy.printing.pretty.pretty_symbology import line_width
-
 from mesh_geometry import reflections
 
 fig = plt.figure()
@@ -37,8 +35,6 @@ def sphere_angle_between(p1,p2):
     cos_gamma = (np.sin(phi1) * np.sin(phi2) * np.cos(azi1 - azi2) + np.cos(phi1) * np.cos(phi2))
     clamp = max(min(cos_gamma, 1), -1)
     return math.acos(clamp)
-
-
 
 def xy_circle(radius):
     return [np.array([radius*np.cos(math.radians(i)),radius*np.sin(math.radians(i)),0]) for i in range(360)]
