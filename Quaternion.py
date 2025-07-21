@@ -1,6 +1,7 @@
 import math
 import numpy as np
 
+
 class Quaternion:
     def __init__(self, a, b, c, d):
         self.a = a  # Real part
@@ -49,3 +50,4 @@ class Quaternion:
         return f"{self.a} + {self.b}i + {self.c}j + {self.d}k"
 
 
+def plane_to_complex_plane(point): return point[0] + point[1] * j
