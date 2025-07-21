@@ -7,11 +7,6 @@ from fractions import Fraction
 import cmath
 from Types import Number
 
-
-
-
-
-
 number_decimals = 8
 tau = math.tau
 circ_angle = lambda div,n: math.sin((math.pi/div) * n)
@@ -33,9 +28,7 @@ prop_golden_ratio = lambda w: prop(w,1+(5**1/2),2)
 quotient = lambda a,b: (a - (a % b)) // b
 cot = lambda x: 1 / math.tan(x)
 nth_root = lambda x,n: x ** 1/n
-phi = (1 + (5 ** 1/2)) / 2
 ang_degrees = np.linspace(0,tau,360)
-theta = lambda n: math.sin((tau/360) * n % 90)
 circum = lambda r: tau*r
 roots_of_unity = lambda n: math.log(math.e ** tau) / n
 sphere_vol = lambda r: tau * pow(r,3)
@@ -51,7 +44,49 @@ right_angle = math.radians(90)
 is_number_list = lambda arr: isinstance(arr,list) and all(isinstance(x,(int,float)) for x in arr)
 t_of_k = lambda k: math.log(pow(math.e,k)) / k
 sinc = lambda x: math.sin(x) / x
+is_num = lambda x: isinstance(x,(int,float))
+is_num_between = lambda x,_min,_max: is_num(x) and _min <= x <= _max
+normalize_vector = lambda v: v / np.linalg.norm(v)
 
+def valid_index(ind,s): return isinstance(ind,int) and ind >= 0 or ind < s
+
+def ang_theta(num):
+  if is_num_between(num,0,tau): return num
+  elif is_num_between(num,0,360): return np.radians(num)
+  else: raise ValueError("must be an angle between 0-pi")
+
+def ang_phi(num):
+  if is_num_between(num,0,np.pi): return num
+  elif is_num_between(num,0,180): return np.radians(num)
+  else: raise ValueError("must be an angle between 0-tau")
+
+def sphere_coord(arr):
+  r,theta,phi = is_num(arr[0]), ang_theta(arr[1]), ang_phi(arr[2])
+  x = np.sin(phi) * np.cos(theta)
+  y = np.sin(phi) * np.sin(theta)
+  z = np.cos(phi)
+  return np.array([x, y, z])
+
+def orthogonal_vectors(sc):
+  ref = np.array([0,1,0])
+  if np.allclose(sc, ref) or np.allclose(sc, -ref): ref = np.array([0, 0, 1])
+  u = normalize_vector(np.cross(ref,sc))
+  v = normalize_vector(np.cross(sc,u))
+  return u,v,ref
+
+def horizontal_sphere_circle(sc, R=1.0, res=360):
+    z = sc[2]
+    if abs(z) > R: raise ValueError("Point is not on the sphere")
+    r_h = np.sqrt(R**2 - z**2)
+    return np.array([
+        [r_h * np.cos(theta), r_h * np.sin(theta), z]
+        for theta in np.linspace(0, 2*np.pi, res)
+    ])
+
+def great_circle(r,u,v,res=360):
+    t = np.linspace(0,tau,res)
+    circle_points = r * (np.outer(np.cos(t), u) + np.outer(np.sin(t), v))
+    return circle_points
 
 def spatial_unit(q,aspect_ratio):
   u = q / sum(aspect_ratio)
@@ -93,20 +128,6 @@ def cart_to_sphere(p):
   x,y,z = (2*u) / dnom, (2*v) / dnom, (-1 + pow(u,2) + pow(v,2)) / dnom
   return [x,y,z]
 
-class ProjectiveSpace:
-
-    def __init__(self,L:Number):
-      self.sidelength = L
-      self.sqr_area = L ** 2
-      self.circ_diam = L
-      self.circ_radius = L / 2
-      self.circum = math.tau / self.circ_radius
-      self.circ_area = math.tau * self.circ_radius
-
-    def volume_ball(self,dimension:int):
-        return self.circum * pow(math.pi,int(dimension/2)) * pow(self.circ_radius,dimension)
-
-
 
 def pyth_third(n):
   whole = ((3*n) * (4*n)) / 3
@@ -114,17 +135,11 @@ def pyth_third(n):
 
   return [whole,third_of_whole]
 
-#print("pyth_third",pyth_third(1))
-
-
-
-
 def linlin(v,inmin,inmax,outmin,outmax): return (v - inmin)/(inmax - inmin) * (outmax - outmin) + outmin
 
 def in_S2(tup):
     x1,x2,x3 = tup[0],tup[1],tup[2]
     return True if pow(x1,2) + pow(x2,2) + pow(x3,2) == 1 else False
-
 
 def unary_operator(fn,dim):
     if isinstance(dim,int) and dim > 0:
@@ -142,22 +157,6 @@ def binary_operator(fn,dim):
     else:
         raise ArgumentTypeError("dim must be int > 0")
 
-def mobius_trans(z,coef):
-  a,b,c,d = coef[0],coef[1],coef[2],coef[3]
-  return ((a*z) + b) /((c*z) + d)
-
-def mobius_transl(z,b):
-  return mobius_trans(z,[1,b,0,1])
-
-def mobius_scale(z,s):
-    return mobius_trans(z,[s,0,0,1])
-
-def mobius_inv(z):
-    return mobius_trans(z,[0,1,1,0])
-
-def mobius_rot(z,ang):
-    return mobius_trans(z, [cmath.exp(1j * ang), 0, 0, 1])
-
 def wedge(v1,v2):
   e = dict()
   for i in range(len(v1)):
@@ -166,82 +165,6 @@ def wedge(v1,v2):
         if i != 0:
           e[k] = (v1[i] * v2[j] - v1[j] * v2[i])
   return e, sum(e.values())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-
-class composite_number:
-
-    def __init__(self,real,imag_parts):
-      if is_number_list(imag_parts) and isinstance(real,(int,float)):
-        self.real = real
-        self.imag_parts = imag_parts
-        self.highest_dim = len(imag_parts) - 1
-        self.imag_sum = sum(self.imag_parts)
-        self.angles = [math.radians(normalize(p,360)) for p in self.imag_parts]
-        self.wrap = lambda x, bound: round(bound * ((x / bound) - int(x / bound)),8) if x > bound else round(x,8)
-        self.cyc_wrap = lambda x, bound: wrap(x, bound) if int(x / bound) % 2 == 0 else round(bound - (wrap(x, bound)),8)
-        #self.direction = 1 if int(num / math.pi) % 2 == 0 else -1
-        #self.angle = (tau/4) + cyc_wrap(num,right_angle)
-        #self.value = math.sin(self.angle)
-
-    def get_direction(self,part_index):
-       if is_bounded_index(self.imag_parts,part_index):
-           return int(self.imag_parts[part_index]/right_angle) % 2 == 0
-
-    def get_angle(self,part_index,sector=None):
-        if is_bounded_index(self.imag_parts,part_index):
-            imag_part = self.imag_parts[part_index]
-            normal_angle = self.cyc_wrap(imag_part,right_angle)
-            if sector and isinstance(sector, int) and 0 <= sector <= 3:
-                return normal_angle + (right_angle * sector)
-            else:
-                return normal_angle + (right_angle * sector)
-        else: raise ValueError("index out of range")
-
-    def get_normal(self,part_index):
-        return round(math.sin(self.get_angle(part_index)[0]),8)
-
-    def get_number_of_turns(self,part_index):
-        if is_bounded_index(self.imag_parts,part_index):
-            return int(self.imag_parts[part_index]/math.tau)
-        else: raise ValueError("index out of range")
-
-    def nsphere_coordinate(self,rad_ratio,dim):
-        cos_c = lambda i: math.cos(self.angles[i])
-        sin_c = lambda i: math.sin(self.angles[i])
-        cos_d,sin_d,cos_l,sin_l = cos_c(-1),sin_c(-1),cos_c(-2),sin_c(-2)
-        br = self.real ** dim
-        rad = normalize(rad_ratio,br) * br
-        comp_first = cos_d
-        comp_mid = lambda j: math.prod([sin_d] + [sin_c(i) if i < (j-1) else cos_c(i) for i in range(0,j)])
-        comp_last = lambda j: math.prod([sin_d] + [sin_c(i) for i in range(0,j)])
-        if dim == 1:
-            return [rad,comp_first]
-        elif dim == 2:
-            return [rad,comp_first,comp_mid(2)]
-        else:
-            mids = [comp_mid(k) for k in range(dim)]
-            return [rad,comp_first] + mids + comp_last(dim)
-
-"""
-
-
-
 
 
 def amt(x):  return tau / math.log(x)
@@ -754,7 +677,7 @@ def is_null_line(l):
 
 def forms_null_line(p1, p2):
     #check if p1 and p2 are distinct
-    if len(set([p1, p2])) != 2:
+    if len(set(p1,p2)) != 2:
         raise ArithmeticError("arguments must be distinct")
     return quadrance_of_distance(p1, p2) == 0
 
@@ -1030,5 +953,52 @@ def solid_numbers(n_iter):
       diagonals_a.append(d)
       diagonals_b.append(d2)
     return [laterals_a,laterals_b,diagonals_a,diagonals_b]
+
+
+def rotate_about(z, center, angle):
+    return (z - center) * cmath.exp(1j * angle) + center
+
+
+def stereo_proj(point,sphere_radius):
+  x,y = point[0],point[1]
+  r = sphere_radius
+  ret_x = 2*x / (pow(x,2)+pow(y,2)+r)
+  ret_y = 2*y / (pow(x,2)+pow(y,2)+r)
+  ret_z = (pow(x,2)+pow(y,2)-r) / (pow(x,2)+pow(y,2)+r)
+  print(ret_z)
+  return [ret_x,ret_y,ret_z]
+
+def sphere_to_complex_plane(sphere_point):
+    x,y,z = sphere_point[0],sphere_point[1],sphere_point[2]
+    return complex(x/(1-z),y/(1-z))
+
+def sphere_to_plane(sphere_point):
+    x,y,z = sphere_point[0],sphere_point[1],sphere_point[2]
+    return [x/(1-z),y/(1-z)]
+
+
+def sphere_rot(point,xy_ang,yz_ang,xz_ang):
+    x,y = point[0],point[1]
+    sphere_point = stereo_proj(point,1)
+
+    rot = lambda z, ang: z * cmath.exp(1j * ang)
+    #center_rot = lambda z, ang, center: (z - center) * cmath.exp(1j * ang) + center
+    to_euclidian = lambda z: [z.real,z.imag]
+    xy_rot = rot(complex(x,y),xy_ang)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
