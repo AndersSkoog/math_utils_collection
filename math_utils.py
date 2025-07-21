@@ -5,7 +5,7 @@ import itertools
 from numbers import Number
 from fractions import Fraction
 import cmath
-from Types import Number
+
 
 number_decimals = 8
 tau = math.tau
@@ -51,13 +51,13 @@ normalize_vector = lambda v: v / np.linalg.norm(v)
 def valid_index(ind,s): return isinstance(ind,int) and ind >= 0 or ind < s
 
 def ang_theta(num):
-  if is_num_between(num,0,tau): return num
-  elif is_num_between(num,0,360): return np.radians(num)
+  if is_num_between(num,-np.pi,np.pi): return num
+  elif is_num_between(num,-180,180): return np.radians(num)
   else: raise ValueError("must be an angle between 0-pi")
 
 def ang_phi(num):
-  if is_num_between(num,0,np.pi): return num
-  elif is_num_between(num,0,180): return np.radians(num)
+  if is_num_between(num,-np.pi/2,np.pi/2): return num
+  elif is_num_between(num,-90,90): return np.radians(num)
   else: raise ValueError("must be an angle between 0-tau")
 
 def sphere_coord(arr):
