@@ -326,6 +326,20 @@ def mobius_rot(z, ang):
     a = cmath.exp(1j * ang)
     return mobius_trans(z, a=a, b=0+0j, c=0+0j, d=1+0j)
 
+def mobius_elipsoid(coord):
+    #v has no z, h has z
+    phi,theta = coord[2], coord[1]
+    vdisp,hdisp = np.cos(np.radians(90) - coord[1]),np.sin(np.radians(theta))
+    vr, hr = math.sqrt(1 - pow(abs(vdisp),2)),math.sqrt(1 - pow(abs(hdisp),2))
+    th = np.linspace(0, 2 * np.pi, 360)
+    v_elips_x = np.full_like(th,vdisp)
+    v_elips_y = vr * np.cos(th)
+    v_elips_z = vr * np.sin(th)
+    h_elips_x = vr * np.cos(th)
+    h_elips_y = vr * np.sin(th)
+    h_elips_z = np.full_like(th,hdisp)
+    print([v_elips_z,v_elips_y,v_elips_x],[h_elips_x,h_elips_y,h_elips_z])
+
 
 def rad_distance(tup):
     u,v = tup[0],tup[1]

@@ -197,9 +197,6 @@ print(philo(0))
 #print(philo_life)
 
 
-
-
-
 obj = dict(
   unit_cycle=360,
   years_of_philosopher=100,
@@ -259,9 +256,6 @@ obj = dict(
 #print(root_by_sqr)
 #print(pyth_hypots)
 #print(pyth_areas)
-
-
-
 
 
 
