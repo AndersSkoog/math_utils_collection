@@ -1,15 +1,14 @@
 """
-Instead of thinking of rational numbers a/b as simply dividing a into b parts,
+Instead of thinking of rational numbers a/b as simply dividing a into b parts.
 We treat it as defining a recursive field based on the integer b (the "host" integer),
 The numerator a defines how many iterations we apply of proportional recursion (or subdivision),
-This results in:
-A minimal unit (the deepest recursive subdivision),
+This results in: A minimal unit (the deepest recursive subdivision),
 A maximum value (number of additions of the minimal unit).
 This reframes a/b as: a recursive steps into the field of reciprocals of integer b.
 
 the proportianal number system recognize that we should not treat rational numbers to be anything else than an expression
 of a reciprocials of an integer b where a/b = 1/b * a
-we get the minimal unit u from dividing the reciprocal 1/b with it self a number of times,
+we get the minimal unit (u) from dividing the reciprocal 1/b with it self (a) number of times,
 """
 
 class ProportionalNumber:
