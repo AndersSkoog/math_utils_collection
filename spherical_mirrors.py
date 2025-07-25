@@ -1,7 +1,6 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from mesh_geometry import reflections
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')

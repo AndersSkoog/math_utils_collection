@@ -1,7 +1,7 @@
 from PIL import Image
 import numpy as np
 from sphere import SpherePoint
-from math_utils import valid_index
+from coll_utils import valid_index
 
 
 class SphereImagePerspective:

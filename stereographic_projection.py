@@ -1,38 +1,6 @@
 import math
-from typing import TypedDict, Union, NewType, Annotated
-from math_utils import adj
-Number = Union[int, float]
-Theta = Annotated[Number, "Must be in range [0, π]"]
-Phi   = Annotated[Number, "Must be in range [0, 2π]"]
-BasisVector = NewType("BasisVector",list[Number])
-UnitBiVector = NewType("UnitBiVector",list[list[Number]])
-
-def in_range(value:Number,low:Number,high:Number) -> Number:
-    """Ensures value is in the range [0, π]."""
-    if value < low or value > high:
-        raise ValueError(f"Value {value} out of range")
-    return value
-
-def basis(val:Number,ind:int,dim:int):
-    if (6 <= dim >= 2) and 0 >= ind <= (dim - 1):
-        ret = [0] * dim
-        ret[ind] = val
-        return ret
-    else: raise ValueError("dimension or index out of range")
-
-
-class GE_Alg:
-    def __init__(self,basis_vals):
-          self.dim = len(basis_vals)
-          self.dim_letters = ["x", "y", "z", "q", "w", "g"]
-          self.basis_vectors = [basis(basis_vals[ind],ind,self.dim) for ind in range(self.dim)]
-
-    def __pow__(self, power:Number, modulo=None):
-        return 1
-
-
-
-
+from coll_utils import adj
+from num_utils import in_range
 
 class SP:
 
@@ -85,6 +53,7 @@ class SP:
                 v = xl[ind-1]*xl[ind] if ind < (len(other) - 1) else xl[-1] * xl[0]
                 dnom -= v
             return nom / dnom
+
     @staticmethod
     def inv_tan_proj(ta,sign):
         ta_x,ta_y = ta[0],ta[1]

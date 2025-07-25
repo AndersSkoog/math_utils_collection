@@ -50,4 +50,11 @@ class Quaternion:
         return f"{self.a} + {self.b}i + {self.c}j + {self.d}k"
 
 
-def plane_to_complex_plane(point): return point[0] + point[1] * j
+east = Quaternion(a=0,  b=1,  c=1,  d=0)
+west = Quaternion(a=0,  b=-1, c=-1, d=0)
+nrth = Quaternion(a=0,  b=-1j,c=1j, d=0)
+soth = Quaternion(a=0,  b=1j, c=-1j,d=0)
+frwd = Quaternion(a=1,  b=0,  c=0,  d=-1)
+back = Quaternion(a=-1, b=0,  c=0,  d=1j)
+
+def plane_to_complex_plane(point): return point[0] + point[1] * 0+1j

@@ -1,12 +1,11 @@
-from math_utils import is_num_between, is_num, normalize_vector, tau, ang_theta, ang_phi
+from num_utils import is_num_between, is_num
+from plane_vector_math import  normalize_vector
+from trig_utils import  ang_theta, ang_phi
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
+from SpherePoint import SpherePoint, stereographic_projection, plane_to_sphere_point
 import math
-from sphere import SpherePoint, stereographic_projection, plane_to_sphere_point
-from SphereImagePerspective import SphereImagePerspective
-
-
 
 fig = plt.figure()
 ax3d = fig.add_subplot(1,2,1, projection='3d')
@@ -75,7 +74,7 @@ def plot_great_circles(sp:SpherePoint, lw):
 
 
 def plot_sphere(sp:SpherePoint):
-    theta_vals = np.linspace(0, tau, 360)
+    theta_vals = np.linspace(0, math.tau, 360)
     phi_vals = np.linspace(0, np.pi, 360)
     mesh_theta, mesh_phi = np.meshgrid(theta_vals, phi_vals)
     sphere_x = sp.center[0] + sp.r * np.sin(mesh_theta) * np.cos(mesh_phi)
