@@ -1,4 +1,8 @@
-# minimal_knot.py
+"""
+NOT FINISHED, WORK IN PROGRESS
+TRYING TO FIGURE OUT HOW TO TRANSLATE REIDEMEISTER MOVES INTO SPATIAL TRASFORMATIONS of Beizer curve segments embedded in R3
+"""
+
 from typing import List, Dict, Tuple
 import math
 
