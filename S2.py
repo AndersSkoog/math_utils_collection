@@ -14,21 +14,21 @@ def stereo_project_R2_R3(p,R=1.0):
   X = 2 * R * x / d
   Y = 2 * R * y / d
   Z = (r2 - R * R) / d
-  return [X,Y,Z]
+  return np.asarray([X,Y,Z])
 
 def R3_to_S2(r3,R=1):
   x,y,z = r3
   R = R if R==1 else np.sqrt(x * x + y * y + z * z)
   theta = np.arctan2(y,x)  # longitude
-  phi = np.sign(y)*np.arccos(z / R)  # colatitude
-  return [R,theta,phi]
+  phi = y*np.arccos(z / R)  # colatitude
+  return np.array([R,theta,phi],dtype=float)
 
 
 def R2_to_S2(r2,R):
   px,py = r2
   theta = np.arctan2(py,px) # can be the theta value for a spherical coordinate
   phi = np.sqrt((px*px)+(py*py)) # can be the polar angle for the spherical coordinate
-  return np.asarray([R,theta,phi])
+  return np.array([R,theta,phi],dtype=float)
 
 #def R2_to_S2(r2,R): return R3_to_S2(stereo_project_R2_R3(r2,R))
 
