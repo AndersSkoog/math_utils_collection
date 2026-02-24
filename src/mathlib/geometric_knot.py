@@ -18,6 +18,7 @@ from num import is_even
 import numpy as np
 from math import tau, sin, cos, comb, factorial
 from itertools import combinations, permutations, product
+from reidemeister import reidemeister_I, reidemeister_II, reidemeister_III
 
 t100 = np.linspace(0,1,100)
 t500 = np.linspace(0,1,500)
@@ -85,6 +86,70 @@ def is_valid(knot_points,radial_vectors,epsilon,rho):
         for i, j in pairs
     )
 
+move_map = {"I":reidemeister_I,"II":reidemeister_II,"III":reidemeister_III}
+
+
+def apply_moves(ctrl, moves):
+  for m in moves:
+    t = m["type"]
+    if t == "I":
+      ctrl = reidemeister_I(ctrl, m["i"], m["r"])
+    elif t == "II":
+      ctrl = reidemeister_II(ctrl, m["i"], m["j"], m["r"])
+    elif t == "III":
+      ctrl = reidemeister_III(ctrl, m["i"], m["j"], m["k"])
+  return ctrl
+
+
+def geometrical_knot(R, sc, ind, perm1, perm2, moves=None):
+  cnt = len(ind)
+  in_ind = [(v - 1) % 360 for v in ind]
+  out_ind = [(v + 1) % 360 for v in ind]
+  perm_in = list(permutations(in_ind))[perm1]
+  perm_out = list(permutations(out_ind))[perm2]
+  ctrl = []
+  for i in range(cnt):
+    ctrl.append(circ_pt(R, perm_in[i]))
+    ctrl.append(sphere_to_cart(R, sc[i]))
+    ctrl.append(circ_pt(R, perm_out[i]))
+  ctrl.append(ctrl[0])  # close loop
+  if moves:
+    ctrl = apply_moves(ctrl, moves)
+
+  return bezier_curve_3d(ctrl, t500)
+
+
+def geometrical_knot_2(R,sc,ind,perm1,perm2,moves):
+
+  cnt = len(ind)
+  in_ind = [v-1 if v != 0 else 359 for v in ind]
+  out_ind = [v+1 % 360 for v in ind]
+  perm_in = list(permutations(in_ind))[perm1]
+  perm_out = list(permutations(out_ind))[perm2]
+  conn_map = []
+  for i in range(cnt):
+    in_pt = circ_pt(R,perm_in[i])
+    out_pt = circ_pt(R,perm_out[i])
+    disp_pt = sphere_to_cart(R,sc[i])
+    conn_map.extend([in_pt,disp_pt,out_pt])
+  conn_map.append(conn_map[0])
+  for move in moves:
+    move_type = move["type"]
+    fn = move_map[move_type]
+
+
+
+  curve = bezier_curve_3d(conn_map,t500)
+  print(curve)
+  return np.array(curve)
+
+"""
+def geometrical_knot_from_int_seq(R,radii,theta_seq,phi_seq,cind_seq,perm,d,eps,rho,res=360,**kwargs):
+  theta_angles = [np.deg2rad(v) for v in get_seq_from_file(theta_seq)[:6]]
+  phi_angles = [np.deg2rad(v) for v in get_seq_from_file(phi_seq)[:6]]
+  cind_vals = get_seq_from_file(cind_seq)[:6]
+  return geometrical_knot(R,radii,theta_angles,phi_angles,cind_vals,perm,d,eps,rho,res)
+  
 def int_seq_to_angles(seq_name,cnt):
   assert cnt < len(int_seq_names), "index out of bounds"
   seq_vals = get_seq_from_file(seq_name)[:cnt]
@@ -113,6 +178,5 @@ def geometrical_knot(R,radii,theta_angles,phi_angles,cind,perm:int,d:int,eps,rho
       seg = bezier_curve_3d([in_pt,disp_pt,out_pt])
       out.extend(seg)
     else: circ_pt(R,i)
-
-
   return np.array(out)
+"""
