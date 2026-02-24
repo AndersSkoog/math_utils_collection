@@ -23,7 +23,6 @@ def R3_to_S2(r3,R=1):
   phi = y*np.arccos(z / R)  # colatitude
   return np.array([R,theta,phi],dtype=float)
 
-
 def R2_to_S2(r2,R):
   px,py = r2
   theta = np.arctan2(py,px) # can be the theta value for a spherical coordinate
@@ -38,6 +37,14 @@ def S2_to_R3(sc):
   x = R * np.sin(phi) * np.cos(theta)
   y = R * np.sin(phi) * np.sin(theta)
   z = R * np.cos(phi)
+  return np.array([x,y,z],dtype=float)
+
+#another conversion suitable for spherical camera
+def S2_to_R3_v2(sc):
+  r,theta,phi = sc
+  x = r * np.sin(phi) * np.cos(theta)
+  y = r * np.cos(phi)
+  z = r * np.sin(phi) * np.sin(theta)
   return np.array([x,y,z],dtype=float)
 
 def S2_cube_vertices(sc):
