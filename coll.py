@@ -1,4 +1,4 @@
-from num_utils import  is_number
+from num import  is_number
 import numpy as np
 import math
 
