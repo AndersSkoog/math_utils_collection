@@ -1,7 +1,7 @@
 import cmath
 import math
 import functools
-from num_utils import normalize as normalize2
+from num import normalize as normalize2
 
 def p2( x, y ):                    return [x,y,0]
 def p3( x, y, z ):                 return [x,y,z]

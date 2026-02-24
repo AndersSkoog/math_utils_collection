@@ -8,8 +8,8 @@ from SpherePoint import SpherePoint, stereographic_projection, plane_to_sphere_p
 import math
 
 fig = plt.figure()
-ax3d = fig.add_subplot(1,2,1, projection='3d')
-ax2d = fig.add_subplot(1,2,2)
+ax3d = fig.add_subplot(1,1,1, projection='3d')
+#ax2d = fig.add_subplot(1,2,2)
 # Create slider axes *after* adjusting layout
 ax_slider_1 = plt.axes([0.2, 0.1, 0.65, 0.03])
 ax_slider_2 = plt.axes([0.2, 0.03, 0.65, 0.03])
@@ -26,11 +26,11 @@ theta_val = 0
 phi_val = 20
 sphere = plane_to_sphere_point(1.2,0.6,2)
 lim = R + 1
-ax2d.set_xlim(-lim,lim)
-ax2d.set_ylim(-lim,lim)
-ax3d.set_xlim(-lim,lim)
-ax3d.set_ylim(-lim,lim)
-ax3d.set_zlim(-lim,lim)
+#ax2d.set_xlim(-lim,lim)
+#ax2d.set_ylim(-lim,lim)
+#ax3d.set_xlim(-lim,lim)
+#ax3d.set_ylim(-lim,lim)
+#ax3d.set_zlim(-lim,lim)
 ax3d.set_box_aspect([1, 1, 1])
 
 
@@ -100,13 +100,13 @@ def plot_ellipses_on_complex_plane(sp: SpherePoint):
     for curve in curves:
       xs = [z.real for z in curve if not np.isinf(z)]
       ys = [z.imag for z in curve if not np.isinf(z)]
-      ax2d.plot(xs,ys)
+      #ax2d.plot(xs,ys)
 
 
 def update_theta(val):
     elev, azim = ax3d.elev, ax3d.azim  # Store camera angle
     ax3d.clear()
-    ax2d.clear()
+    #ax2d.clear()
     global sphere,theta_val,phi_val
     theta_val = val
     sphere = SpherePoint(R,theta=theta_val,phi=phi_val,center=C)
@@ -124,7 +124,7 @@ def update_theta(val):
 def update_phi(val):
     elev, azim = ax3d.elev, ax3d.azim  # Store camera angle
     ax3d.clear()
-    ax2d.clear()
+    #ax2d.clear()
     global sphere,theta_val,phi_val
     phi_val = val
     sphere = SpherePoint(R,theta=theta_val,phi=phi_val,center=C)

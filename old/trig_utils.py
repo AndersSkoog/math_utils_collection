@@ -1,4 +1,4 @@
-from num_utils import is_num, is_num_between
+from num import is_num, is_num_between
 import numpy as np
 import math
 import cmath
@@ -34,9 +34,6 @@ def spherical_to_cartesian(r, theta, phi):
     z = r * np.cos(theta)
     return [x, y, z]
 
-
-
-
 def rotate_about(z, center, angle):
     return (z - center) * cmath.exp(1j * angle) + center
 
@@ -57,7 +54,6 @@ def sphere_to_complex_plane(sphere_point):
 def sphere_to_plane(sphere_point):
     x,y,z = sphere_point[0],sphere_point[1],sphere_point[2]
     return [x/(1-z),y/(1-z)]
-
 
 def sphere_rot(point,xy_ang,yz_ang,xz_ang):
     x,y = point[0],point[1]

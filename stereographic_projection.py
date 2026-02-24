@@ -1,6 +1,6 @@
 import math
-from coll_utils import adj
-from num_utils import in_range
+from coll import adj
+from num import in_range
 
 class SP:
 

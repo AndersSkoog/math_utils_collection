@@ -1,5 +1,5 @@
 from fractions import Fraction
-from coll_utils import arr_eq, find_min, find_max, find_with_pred
+from coll import arr_eq, find_min, find_max, find_with_pred
 import numpy as np
 
 normalize_vector = lambda v: v / np.linalg.norm(v)
