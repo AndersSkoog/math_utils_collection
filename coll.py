@@ -1,7 +1,7 @@
-from num import  is_number
 import numpy as np
 import math
-
+from num import  is_number
+from functools import reduce
 
 def adj(l): return [[l[i - 1], l[i]] for i in range(1, len(l))]
 
@@ -58,5 +58,12 @@ def det(m):
   for it2 in list(reversed(range(dim))):
     t2.append(math.prod([m[j2][(it2 - j2) % dim] for j2 in range(dim)]))
   return sum(t1) - sum(t2)
+
+def all_pred(arr,fn): return all(map(fn,arr))
+
+def any_pred(arr,fn): return any(map(fn,arr))
+
+def arr_prod(arr): return reduce(lambda acc,cur: acc * cur,arr)
+def arr_sum(arr): return reduce(lambda acc,cur: acc + cur,arr)
 
 

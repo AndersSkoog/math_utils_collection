@@ -1,7 +1,8 @@
 import math
 import numpy as np
-from math import tau, sin, cos, sqrt, tan, pi
+from math import tau, pi, sin, cos, sqrt, tan, prod, factorial,floor
 from vector_utils import normalize_vector
+from num import normalize
 
 def paralell_radius(phi:float):return tan(phi / 2)
 
@@ -27,9 +28,9 @@ def parallel_radius(P,r):
 
 
 
-def sphere_point_orientation(pt, sphere_radius):
+def sphere_point_orientation(pt, R):
     pt = np.array(pt, dtype=float)
-    r = sphere_radius
+    r = R
     u = normalize_vector(pt)  # radial direction
     cv = center_vector(pt,np.array([0,0,r]))
 
@@ -65,8 +66,6 @@ def sphere_to_cart(r,theta,phi):
     return [x,y,z]
 
 
-
-normalize_vector = lambda x,maximum: x / (maximum * x)
 
 def parallel_circ(r,theta,phi,angles):
     r, phi = r, phi
@@ -127,15 +126,15 @@ def ellipse_yz_neg(r,theta,phi,angles):
     return np.array([[-pv, r * cos(ang), r * sin(ang)] for ang in angles])
 
 
-def sphere_radius(r,t): return math.sqrt(pow(r,2) - pow(t,2))
+def sphere_radius(r,t): return sqrt(pow(r,2) - pow(t,2))
 
-def area_sphere(r):return 4*math.pi*pow(r,2)
+def area_sphere(r):return 4*pi*pow(r,2)
 
 def n_ang_cos(ang):
-  return math.cos(math.pi * normalize_vector(ang,math.pi))
+  return cos(pi * normalize(ang,pi))
 
 def n_ang_sin(ang):
-  return math.sin(math.tau * normalize_vector(ang,math.tau))
+  return sin(tau * normalize(ang,tau))
 
 def n_coord(arr,i):
     if i == 1:
@@ -143,7 +142,7 @@ def n_coord(arr,i):
     elif i == len(arr):
         l = [arr[0]] + [math.sin(v) for v in arr[1:i]]
         print(l)
-        return math.prod(l)
+        return prod(l)
     else:
         if i > len(arr):
             raise ValueError("i not in range")
@@ -152,7 +151,7 @@ def n_coord(arr,i):
           cos_val = [math.cos(arr[-1])]
           l = [arr[0]] + sin_vals + cos_val
           print(l)
-          return math.prod(l)
+          return prod(l)
 
 def n_coord_normalize(arr,i):
   if i <= len(arr):
@@ -160,13 +159,13 @@ def n_coord_normalize(arr,i):
     is_first = i == 1
     if is_first:
       parr = [arr[0]*n_ang_cos(arr[1])]
-      return [math.prod(parr),len(parr)]
+      return [prod(parr),len(parr)]
     elif is_sec_last:
       parr = [arr[0]] + [n_ang_sin(v) for v in arr[1:i-1]] + [n_ang_cos(arr[i])]
-      return [math.prod(parr),len(parr)]
+      return [prod(parr),len(parr)]
     else:
       parr = [arr[0]] + [n_ang_sin(v) for v in arr[1:i]]
-      return [math.prod(parr),len(parr)]
+      return [prod(parr),len(parr)]
   else:
       raise ValueError("i must be in range of arr")
 
@@ -179,14 +178,14 @@ def n_coords(arr):
         ret[f"x{i}"] = n_coord(arr,i)
     return ret
 
-def conj_unit(num_of_decimals):return round(math.tau,num_of_decimals) - round(math.tau,num_of_decimals - 1)
+def conj_unit(num_of_decimals):return round(tau,num_of_decimals) - round(tau,num_of_decimals - 1)
 
 def derivative(x):
     h,f = 1e-5, lambda v: v**2 + 1
     return (f(x+h)-f(x-h))/(2*h)
 
 def n_sphere_vol(n, r):
-    return (pow(2,n) * pow(r,n) * pow((math.tau / 4),math.floor(n/2))) / math.factorial(math.factorial(n))
+    return (pow(2,n) * pow(r,n) * pow((tau / 4),floor(n/2))) / factorial(factorial(n))
 
 def n_sphere_area(n, r):
     Rn = pow(r,n-1) * r
@@ -203,7 +202,7 @@ def hypersphere_parallel(radius,ang_cnt=90,cnt=10):
         r_eff = radius * np.sin(chi)
         z_offset = radius * np.cos(chi)
         # project the 2-sphere (x,y,z) part
-        sph = [parallel_circ(SphereCoord(r_eff, 0, phi),angles) + np.array([0, 0, z_offset]) for phi in phis]
+        sph = [parallel_circ(r_eff, 0.0, phi,angles) + np.array([0.0,0.0, z_offset]) for phi in phis]
         circles.append(sph)
     return circles
 

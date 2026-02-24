@@ -33,7 +33,7 @@ def hyperbolic_circle_intersections(circle_center:complex):
   magc = mag(c)
   if magc <= 1: raise ValueError("Center must satisfy |C|>1 for an orthogonal circle.")
   argc = arg(c)
-  cosc = np.acos(1.0/magc)
+  cosc = np.arccos(1.0/magc)
   z1 = cmath.exp(1j * (argc + cosc)) # circle intersecting unit circle at z1 and z2
   z2 = cmath.exp(1j * (argc - cosc))
   return z1,z2
@@ -72,7 +72,7 @@ def hyperbolic_polygon(p: int, q: int, center: complex = 0.0 + 0.0j, res: int = 
   inner_angle = tau / q
   # Compute the side length (hyperbolic distance) using the hyperbolic cosine rule
   cosh_r = (cos(pi/p)*cos(pi/q)+cos(inner_angle/2))/(sin(pi/p)*sin(pi/q))
-  r = np.acosh(cosh_r)  # Radius of the circumscribed circle
+  r = np.arccosh(cosh_r)  # Radius of the circumscribed circle
   # Convert hyperbolic radius to Poincaré disk radius
   pr = (np.exp(r) - 1) / (np.exp(r) + 1)
   # Generate vertices uniformly spaced around the center
